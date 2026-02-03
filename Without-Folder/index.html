@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Button</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 60px 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h1 {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+            margin-bottom: 40px;
+        }
+
+        #btn {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(255, 107, 107, 0.6);
+            background: linear-gradient(45deg, #ff5252, #ffb300);
+        }
+
+        #btn:active {
+            transform: translateY(-2px);
+        }
+
+        #btn.loading {
+            pointer-events: none;
+            background: linear-gradient(45deg, #666, #999);
+            box-shadow: 0 10px 30px rgba(102, 102, 102, 0.4);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status {
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            min-height: 20px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 40px 30px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Interactive Demo</h1>
+        <p class="subtitle">Click the button to trigger the API</p>
+        <button id="btn">
+            <span class="spinner" style="display: none;"></span>
+            Click Me
+        </button>
+        <div id="status" class="status"></div>
+    </div>
+
+    <script>
+        const button = document.getElementById("btn");
+        const status = document.getElementById("status");
+        const spinner = button.querySelector(".spinner");
+
+        button.addEventListener("click", async () => {
+            // Show loading state
+            button.classList.add("loading");
+            spinner.style.display = "inline-block";
+            button.textContent = "Sending...";
+            status.textContent = "Request in progress...";
+
+            try {
+                const response = await fetch("http://localhost:3000/button-click", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                if (response.ok) {
+                    status.textContent = "✅ Request sent successfully!";
+                    status.style.color = "#4CAF50";
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                status.textContent = `❌ Error: ${error.message}`;
+                status.style.color = "#f44336";
+            } finally {
+                // Reset button state
+                setTimeout(() => {
+                    button.classList.remove("loading");
+                    spinner.style.display = "none";
+                    button.textContent = "Click Me";
+                    status.textContent = "";
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>
